@@ -5,7 +5,7 @@ import re
 
 import dotenv
 import openai
-from telegram import constants, Update
+from telegram import constants, Update, Message
 from telegram.ext import filters, MessageHandler, ApplicationBuilder, ContextTypes
 from telegram.ext.filters import MessageFilter
 
@@ -20,7 +20,7 @@ ALLOWED_CHATS = os.getenv("ALLOWED_CHATS")
 
 
 class MessageChatFilter(MessageFilter):
-    def filter(self, message: str):
+    def filter(self, message: Message):
         return message.chat.id in ALLOWED_CHATS
 
 
