@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime
+import json
 import os
 import re
 
@@ -15,8 +16,8 @@ dotenv.load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 OPENAI_TOKEN = os.getenv("OPENAI_TOKEN")
 openai.api_key = OPENAI_TOKEN
-TARGET_USERNAMES = os.getenv("TARGET_USERNAMES")
-ALLOWED_CHATS = os.getenv("ALLOWED_CHATS")
+TARGET_USERNAMES = json.loads(os.getenv("TARGET_USERNAMES"))
+ALLOWED_CHATS = json.loads(os.getenv("ALLOWED_CHATS"))
 
 
 class MessageChatFilter(MessageFilter):
