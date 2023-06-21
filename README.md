@@ -4,15 +4,19 @@ RoastGPT is a Telegram bot that roasts targeted users in a chat group. When a ta
 
 This was built as a fun project for a group chat with friends.
 
+## Sample
+
+![image](https://github.com/pakshuang/roast-gpt/assets/81917538/fa865bcc-37a7-4f40-8e42-fb72f71516b6)
+
 ## Building
 
-First you will need to create a `.env` file to set the Telegram Bot API key, Open AI API key, target users, and target group:
+First you will need to create a `.env` file to set the Telegram Bot API key, Open AI API key, target usernames, and target chat ids:
 
 ```Dotenv
 TELEGRAM_TOKEN = "INSERT TELEGRAM TOKEN HERE"
 OPENAI_TOKEN = "INSERT OPEN AI API TOKEN HERE"
 TARGET_USERNAMES = ["username1", "username2"]
-ALLOWED_CHATS = [-100987654321, 123456789]
+ALLOWED_CHATS = [-100987654321]
 ```
 
 Ensure that you have Docker installed, then run this command to build the Docker image.
