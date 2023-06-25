@@ -20,28 +20,26 @@ TARGET_USERNAMES = json.loads(os.getenv("TARGET_USERNAMES"))
 ALLOWED_CHATS = json.loads(os.getenv("ALLOWED_CHATS"))
 
 
-class MessageChatFilter(MessageFilter):
-    def filter(self, message: Message):
-        return message.chat.id in ALLOWED_CHATS
-
-
-def log_message(previous_messages: list, message_sender: str, message_timestamp: str, message_text: str):
-    message = f"{message_sender}, [{message_timestamp}]\n{message_text}"
+def log_message(previous_messages: list, message_sender: str, message_timestamp: str, message_text: str, reply: Message=None):
+    reply_to = f"[Replying to {reply['from'].first_name}'s message sent at {reply.date.strftime(config.DATE_FORMAT)}]" if reply else ""
+    message = f"{message_sender}, [{message_timestamp}]{reply_to}\n{message_text}"
     print(message)
     previous_messages.append(message)
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Get chat and message information
-    chat_id = update.message.chat_id
-    message_id = update.message.message_id
-    message_sender = update.message['from'].first_name
-    message_sender_username = update.message['from'].username
-    message_timestamp = update.message.date.strftime(config.DATE_FORMAT)
-    message_text = update.message.text
+    message = update.message
+    chat_id = message.chat_id
+    message_id = message.message_id
+    message_sender = message['from'].first_name
+    message_sender_username = message['from'].username
+    message_timestamp = message.date.strftime(config.DATE_FORMAT)
+    message_text = message.text if not message.sticker else message.sticker.emoji
+    message_reply = message.reply_to_message
 
     # Handle chat history
-    log_message(previous_messages, message_sender, message_timestamp, message_text)
+    log_message(previous_messages, message_sender, message_timestamp, message_text, message_reply)
     while len(previous_messages) > config.CHAT_HISTORY_LENGTH:
         previous_messages.pop(0)
 
@@ -68,6 +66,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not (4 <= sentiment_int <= 9):
         return
     
+    # Generate roast reply
     thread = "\n\n".join(previous_messages)
     main_prompt = config.generate_main_prompt(message_sender, thread)
     await context.bot.send_chat_action(chat_id=chat_id, action=constants.ChatAction.TYPING)
@@ -83,15 +82,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     main_response_cleaned_right_quote = re.sub(r'["\']$', '', main_response_cleaned_left_quote)
     main_response_cleaned_you = re.sub(r'^You: ', '', main_response_cleaned_right_quote)
     print("RESPONSE:", main_response)
-    print("CLEANED RESPONSE:", main_response_cleaned_you)
-    log_message(previous_messages, "You", datetime.now().strftime(config.DATE_FORMAT), main_response)
+    print("\033[91m", "CLEANED RESPONSE:", main_response_cleaned_you, "\033[00m")
+    log_message(previous_messages, "You", datetime.now().strftime(config.DATE_FORMAT), main_response, message)
     await context.bot.send_message(chat_id=update.effective_chat.id, reply_to_message_id=message_id, text=main_response)
 
 
 if __name__ == '__main__':
     previous_messages = []
     application = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
-    message_handler = MessageHandler(MessageChatFilter() & filters.TEXT & (~filters.COMMAND), handle_message)
+    message_handler = MessageHandler(filters.Chat(chat_id=ALLOWED_CHATS) & (filters.TEXT | filters.Sticker.ALL) & (~filters.COMMAND), handle_message)
     application.add_handler(message_handler)
     print("Bot started, waiting for messages...")
     asyncio.run(application.run_polling())
