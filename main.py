@@ -89,6 +89,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 if __name__ == '__main__':
+    if not os.path.exists("chat_history.json"):
+        print("\033[91m" + "Chat history not found, creating new file..." + "\033[00m")
+        with open("chat_history.json", "w") as file:
+            json.dump([], file)
     with open("chat_history.json", "rb") as file:
         chat_history = json.load(file)
         print("\033[92m" + "Chat history:" + "\033[00m")
