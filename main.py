@@ -19,11 +19,15 @@ TARGET_USERNAMES = json.loads(os.getenv("TARGET_USERNAMES"))
 ALLOWED_CHATS = json.loads(os.getenv("ALLOWED_CHATS"))
 
 
-def log_message(previous_messages: list, message_sender: str, message_timestamp: str, message_text: str, reply: Message=None):
+def log_message(chat_history: list, message_sender: str, message_timestamp: str, message_text: str, reply: Message=None):
     reply_to = f"[Replying to {reply['from'].first_name}'s message sent at {reply.date.strftime(config.DATE_FORMAT)}]" if reply else ""
     message = f"{message_sender}, [{message_timestamp}]{reply_to}\n{message_text}"
+    chat_history.append(message)
     print(message)
-    previous_messages.append(message)
+    while len(chat_history) > config.CHAT_HISTORY_LENGTH:
+        chat_history.pop(0)
+    with open("chat_history.json", "w") as file:
+        json.dump(chat_history, file)
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -36,13 +40,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_timestamp = message.date.strftime(config.DATE_FORMAT)
     message_text = message.text if not message.sticker else message.sticker.emoji
     message_reply = message.reply_to_message
+    log_message(chat_history, message_sender, message_timestamp, message_text, message_reply)
 
-    # Handle chat history
-    log_message(previous_messages, message_sender, message_timestamp, message_text, message_reply)
-    while len(previous_messages) > config.CHAT_HISTORY_LENGTH:
-        previous_messages.pop(0)
-
-    # Only run for messages from certain users
+    # Only run prompts for messages from certain users
     if message_sender_username not in TARGET_USERNAMES:
         return
     
@@ -66,7 +66,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     
     # Generate roast reply
-    thread = "\n\n".join(previous_messages)
+    thread = "\n\n".join(chat_history)
     main_prompt = config.generate_main_prompt(message_sender, thread)
     await context.bot.send_chat_action(chat_id=chat_id, action=constants.ChatAction.TYPING)
     completion = openai.ChatCompletion.create(
@@ -81,16 +81,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     main_response_cleaned_right_quote = re.sub(r'["\']$', '', main_response_cleaned_left_quote)
     main_response_cleaned_you = re.sub(r'^You: ', '', main_response_cleaned_right_quote)
     print("RESPONSE:", main_response)
-    print("\033[91m", "CLEANED RESPONSE:", main_response_cleaned_you, "\033[00m")
-    log_message(previous_messages, "You", datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=8))).strftime(config.DATE_FORMAT), main_response, message)
+    print("\033[91m" + "CLEANED RESPONSE: " + main_response_cleaned_you + "\033[00m")
+    log_message(chat_history, "You", datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=8))).strftime(config.DATE_FORMAT), main_response, message)
     await context.bot.send_message(chat_id=update.effective_chat.id, reply_to_message_id=message_id, text=main_response)
 
 
 if __name__ == '__main__':
-    previous_messages = [] # TODO: Save thread to file for persistence after restart
+    with open("chat_history.json", "rb") as file:
+        chat_history = json.load(file)
+        print("\033[92m" + "Chat history:" + "\033[00m")
+        for message in chat_history:
+            print(message)
     defaults = Defaults(tzinfo=datetime.timezone(datetime.timedelta(hours=8)))
     application = ApplicationBuilder().token(TELEGRAM_TOKEN).defaults(defaults).build()
     message_handler = MessageHandler(filters.Chat(chat_id=ALLOWED_CHATS) & (filters.TEXT | filters.Sticker.ALL) & (~filters.COMMAND) & filters.UpdateType.MESSAGE, handle_message)
     application.add_handler(message_handler)
-    print("Bot started, waiting for messages...")
+    print("\033[92m" + "Bot started, waiting for messages..." + "\033[00m")
     asyncio.run(application.run_polling())

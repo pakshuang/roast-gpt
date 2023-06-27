@@ -1,4 +1,4 @@
 .env
 __pycache__/
-history.txt
+chat_history.json
 *.pdf
