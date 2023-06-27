@@ -4,6 +4,7 @@ import json
 import os
 import random
 import re
+import time
 
 import dotenv
 import openai
@@ -71,14 +72,23 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     thread = "\n\n".join(chat_history)
     main_prompt = config.generate_main_prompt(message_sender, thread)
     await context.bot.send_chat_action(chat_id=chat_id, action=constants.ChatAction.TYPING) # Show typing status
-    completion = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": config.SYSTEM_ROLE_MAIN},
-            {"role": "user", "content": main_prompt}
-        ]
-    )
-    main_response = completion.choices[0].message.content
+    print("Requesting response...")
+    tries = 0
+    while tries < config.MAX_RETRIES:
+        try:
+            completion = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": config.SYSTEM_ROLE_MAIN},
+                    {"role": "user", "content": main_prompt}
+                ]
+            )
+            main_response = completion.choices[0].message.content
+        except openai.error.ServiceUnavailableError:
+            print("SERVICE UNAVAILABLE, RETRYING IN 10 SECONDS...")
+            tries += 1
+            time.sleep(10)
+            continue
     main_response_cleaned_left_quote = re.sub(r'^["\']', '', main_response)
     main_response_cleaned_right_quote = re.sub(r'["\']$', '', main_response_cleaned_left_quote)
     main_response_cleaned_you = re.sub(r'^You: ', '', main_response_cleaned_right_quote)
