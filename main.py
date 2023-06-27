@@ -2,6 +2,7 @@ import asyncio
 import datetime
 import json
 import os
+import random
 import re
 
 import dotenv
@@ -43,10 +44,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     log_message(chat_history, message_sender, message_timestamp, message_text, message_reply)
 
     # Only run prompts for messages from certain users
-    if message_sender_username not in TARGET_USERNAMES:
-        return
-    
-    # Check message meaness
+    if message_sender_username not in TARGET_USERNAMES: # User filter
+        if not (config.FUZZY_USER_FILTER and random.randint(1,100) <= config.FUZZY_PROBABILITY): # Fuzzy user filter
+            return
+
+    # Qualify message
     check_prompt = config.generate_check_prompt(message_text)
     sentiment_check = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -62,13 +64,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sentiment_cleaned = re.sub(r'\D', '', sentiment_response)
     sentiment_int = int(sentiment_cleaned) if sentiment_cleaned != "" else 0
     print("SENTIMENT CLEANED:", sentiment_int)
-    if not (4 <= sentiment_int <= 9):
+    if not (config.QUALIFICATION_THRESHOLD <= sentiment_int <= 9):
         return
     
     # Generate roast reply
     thread = "\n\n".join(chat_history)
     main_prompt = config.generate_main_prompt(message_sender, thread)
-    await context.bot.send_chat_action(chat_id=chat_id, action=constants.ChatAction.TYPING)
+    await context.bot.send_chat_action(chat_id=chat_id, action=constants.ChatAction.TYPING) # Show typing status
     completion = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
