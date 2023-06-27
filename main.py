@@ -20,7 +20,7 @@ ALLOWED_CHATS = json.loads(os.getenv("ALLOWED_CHATS"))
 
 
 def log_message(previous_messages: list, message_sender: str, message_timestamp: str, message_text: str, reply: Message=None):
-    reply_to = f"[Replying to {reply['from'].first_name}'s message sent at {reply.date.strftime(config.DATE_FORMAT)}]" if reply else ""
+    reply_to = f"[Replying to {reply['from'].first_name}'s message sent at {reply.date.strftime(config.DATE_FORMAT)}]" if reply else "" # TODO: Fix timezone
     message = f"{message_sender}, [{message_timestamp}]{reply_to}\n{message_text}"
     print(message)
     previous_messages.append(message)
@@ -87,7 +87,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 if __name__ == '__main__':
-    previous_messages = []
+    previous_messages = [] # TODO: Save thread to file for persistence after restart
     application = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
     message_handler = MessageHandler(filters.Chat(chat_id=ALLOWED_CHATS) & (filters.TEXT | filters.Sticker.ALL) & (~filters.COMMAND) & filters.UpdateType.MESSAGE, handle_message)
     application.add_handler(message_handler)
