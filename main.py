@@ -8,7 +8,6 @@ import dotenv
 import openai
 from telegram import constants, Update, Message
 from telegram.ext import filters, MessageHandler, ApplicationBuilder, ContextTypes
-from telegram.ext.filters import MessageFilter
 
 import config
 
@@ -90,7 +89,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 if __name__ == '__main__':
     previous_messages = []
     application = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
-    message_handler = MessageHandler(filters.Chat(chat_id=ALLOWED_CHATS) & (filters.TEXT | filters.Sticker.ALL) & (~filters.COMMAND), handle_message)
+    message_handler = MessageHandler(filters.Chat(chat_id=ALLOWED_CHATS) & (filters.TEXT | filters.Sticker.ALL) & (~filters.COMMAND) & filters.UpdateType.MESSAGE, handle_message)
     application.add_handler(message_handler)
     print("Bot started, waiting for messages...")
     asyncio.run(application.run_polling())
