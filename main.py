@@ -1,5 +1,5 @@
 import asyncio
-from datetime import datetime
+import datetime
 import json
 import os
 import re
@@ -7,7 +7,7 @@ import re
 import dotenv
 import openai
 from telegram import constants, Update, Message
-from telegram.ext import filters, MessageHandler, ApplicationBuilder, ContextTypes
+from telegram.ext import filters, MessageHandler, ApplicationBuilder, ContextTypes, Defaults
 
 import config
 
@@ -20,7 +20,7 @@ ALLOWED_CHATS = json.loads(os.getenv("ALLOWED_CHATS"))
 
 
 def log_message(previous_messages: list, message_sender: str, message_timestamp: str, message_text: str, reply: Message=None):
-    reply_to = f"[Replying to {reply['from'].first_name}'s message sent at {reply.date.strftime(config.DATE_FORMAT)}]" if reply else "" # TODO: Fix timezone
+    reply_to = f"[Replying to {reply['from'].first_name}'s message sent at {reply.date.strftime(config.DATE_FORMAT)}]" if reply else ""
     message = f"{message_sender}, [{message_timestamp}]{reply_to}\n{message_text}"
     print(message)
     previous_messages.append(message)
@@ -82,13 +82,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     main_response_cleaned_you = re.sub(r'^You: ', '', main_response_cleaned_right_quote)
     print("RESPONSE:", main_response)
     print("\033[91m", "CLEANED RESPONSE:", main_response_cleaned_you, "\033[00m")
-    log_message(previous_messages, "You", datetime.now().strftime(config.DATE_FORMAT), main_response, message)
+    log_message(previous_messages, "You", datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=8))).strftime(config.DATE_FORMAT), main_response, message)
     await context.bot.send_message(chat_id=update.effective_chat.id, reply_to_message_id=message_id, text=main_response)
 
 
 if __name__ == '__main__':
     previous_messages = [] # TODO: Save thread to file for persistence after restart
-    application = ApplicationBuilder().token(TELEGRAM_TOKEN).build()
+    defaults = Defaults(tzinfo=datetime.timezone(datetime.timedelta(hours=8)))
+    application = ApplicationBuilder().token(TELEGRAM_TOKEN).defaults(defaults).build()
     message_handler = MessageHandler(filters.Chat(chat_id=ALLOWED_CHATS) & (filters.TEXT | filters.Sticker.ALL) & (~filters.COMMAND) & filters.UpdateType.MESSAGE, handle_message)
     application.add_handler(message_handler)
     print("Bot started, waiting for messages...")
