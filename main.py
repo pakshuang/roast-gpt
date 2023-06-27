@@ -51,6 +51,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Qualify message
     check_prompt = config.generate_check_prompt(message_text)
+    print("Requesting sentiment analysis...")
     sentiment_check = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         temperature = 0.2,
@@ -89,11 +90,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             tries += 1
             time.sleep(10)
             continue
-    main_response_cleaned_left_quote = re.sub(r'^["\']', '', main_response)
-    main_response_cleaned_right_quote = re.sub(r'["\']$', '', main_response_cleaned_left_quote)
-    main_response_cleaned_you = re.sub(r'^You: ', '', main_response_cleaned_right_quote)
+    main_response_cleaned = re.sub(r'^["\']', '', main_response)
+    main_response_cleaned = re.sub(r'["\']$', '', main_response_cleaned)
+    main_response_cleaned = re.sub(r'^You: ', '', main_response_cleaned)
+    main_response_cleaned = re.sub(r'^NUS Wordle Bot: ', '', main_response_cleaned)
     print("RESPONSE:", main_response)
-    print("\033[91m" + "CLEANED RESPONSE: " + main_response_cleaned_you + "\033[00m")
+    print("\033[91m" + "CLEANED RESPONSE: " + main_response_cleaned + "\033[00m")
     log_message(chat_history, "You", datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=8))).strftime(config.DATE_FORMAT), main_response, message)
     await context.bot.send_message(chat_id=update.effective_chat.id, reply_to_message_id=message_id, text=main_response)
 
