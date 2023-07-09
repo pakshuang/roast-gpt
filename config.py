@@ -10,6 +10,8 @@ QUALIFICATION_THRESHOLD = 4
 
 MAX_RETRIES = 3
 
+RETRY_DELAY = 5 # seconds
+
 SYSTEM_ROLE_CHECK = f"""You are a function that takes a chat message as input and outputs an integer from 0 to 9 inclusive. When I provide a chat message, you will determine whether a statement deserves to be roasted and output an integer from 0 to 9 inclusive.
 10 means the message is extremely deserving of a roast. If the statement cannot be evaluated, output 0. Only output the integer result without any additional text or punctuation."""
 
