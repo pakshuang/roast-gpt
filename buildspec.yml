@@ -20,3 +20,5 @@ phases:
       - docker push $REPOSITORY_URI:latest
       - echo Saving image definition
       - printf '[{"name":"roast-gpt","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
+artifacts:
+  files: imagedefinitions.json
