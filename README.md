@@ -16,7 +16,7 @@ First you will need to create a `.env` file to set the Telegram Bot API key, Ope
 TELEGRAM_TOKEN = "INSERT TELEGRAM TOKEN HERE"
 OPENAI_TOKEN = "INSERT OPEN AI API TOKEN HERE"
 TARGET_USERNAMES = ["username1", "username2"]
-ALLOWED_CHATS = [-100987654321]
+TARGET_CHAT_ID = [-100987654321]
 ```
 
 Ensure that you have Docker installed, then run this command to build the Docker image.

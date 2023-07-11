@@ -19,7 +19,7 @@ TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 OPENAI_TOKEN = os.getenv("OPENAI_TOKEN")
 openai.api_key = OPENAI_TOKEN
 TARGET_USERNAMES = json.loads(os.getenv("TARGET_USERNAMES"))
-ALLOWED_CHATS = json.loads(os.getenv("ALLOWED_CHATS"))
+TARGET_CHAT_ID = json.loads(os.getenv("TARGET_CHAT_ID"))
 init(autoreset=True) # Colorama
 
 
@@ -115,7 +115,7 @@ if __name__ == '__main__':
             print(message)
     defaults = Defaults(tzinfo=datetime.timezone(datetime.timedelta(hours=8)))
     application = ApplicationBuilder().token(TELEGRAM_TOKEN).defaults(defaults).build()
-    message_handler = MessageHandler(filters.Chat(chat_id=ALLOWED_CHATS) & (filters.TEXT | filters.Sticker.ALL) & (~filters.COMMAND) & filters.UpdateType.MESSAGE, handle_message)
+    message_handler = MessageHandler(filters.Chat(chat_id=TARGET_CHAT_ID) & (filters.TEXT | filters.Sticker.ALL) & (~filters.COMMAND) & filters.UpdateType.MESSAGE, handle_message)
     application.add_handler(message_handler)
     print(Fore.GREEN + "Bot started, waiting for messages...")
     asyncio.run(application.run_polling())
