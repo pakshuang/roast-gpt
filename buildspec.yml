@@ -2,6 +2,7 @@ version: 0.2
 
 phases:
   pre_build:
+    on-failure: ABORT
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
@@ -10,11 +11,13 @@ phases:
       - env > $CODEBUILD_SRC_DIR/.env
       - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
   build:
+    on-failure: ABORT
     commands:
       - echo Building the Docker image...
       - docker build -t $REPOSITORY_URI:latest .
       - echo Build complete
   post_build:
+    on-failure: ABORT
     commands:
       - echo Pushing image to Amazon ECR...
       - docker push $REPOSITORY_URI:latest
