@@ -68,7 +68,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     sentiment_cleaned = re.sub(r'\D', '', sentiment_response)
     sentiment_int = int(sentiment_cleaned) if sentiment_cleaned != "" else 0
     print(Fore.BLUE + "SENTIMENT CLEANED: " + str(sentiment_int))
-    if config.QUALIFICATION_THRESHOLD <= sentiment_int <= 9:
+    if config.QUALIFICATION_THRESHOLD <= sentiment_int <= 10:
         print(Fore.GREEN + "QUALIFIED")
     else:
         print(Fore.RED + "NOT QUALIFIED, SKIPPING...")
