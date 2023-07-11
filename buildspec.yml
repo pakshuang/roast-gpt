@@ -8,12 +8,15 @@ phases:
       - echo Login successful
       - echo Generating .env file
       - env > $CODEBUILD_SRC_DIR/.env
+      - $REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
   build:
     commands:
       - echo Building the Docker image...
-      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest .
+      - docker build -t $REPOSITORY_URI:latest .
       - echo Build complete
   post_build:
     commands:
       - echo Pushing image to Amazon ECR...
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
+      - docker push $REPOSITORY_URI:latest
+      - echo Saving image definition
+      - printf '[{"name":"roast-gpt","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imagedefinitions.json
