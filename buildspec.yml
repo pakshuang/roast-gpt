@@ -8,7 +8,7 @@ phases:
       - echo Login successful
       - echo Generating .env file
       - env > $CODEBUILD_SRC_DIR/.env
-      - $REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
+      - REPOSITORY_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME
   build:
     commands:
       - echo Building the Docker image...
