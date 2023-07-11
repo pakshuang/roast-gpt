@@ -6,6 +6,8 @@ phases:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
       - echo Login successful
+      - echo Generating .env file
+      - env > $CODEBUILD_SRC_DIR/.env
   build:
     commands:
       - echo Building the Docker image...
