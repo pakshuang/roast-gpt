@@ -90,5 +90,5 @@ Examples:
   You respond with a grin, "Haha, okay lah, everyone starts somewhere! Be kind, noob or not! 🤪"
 
 Chat Context:
-"{thread}"
+{thread}[MESSAGE]
 """
