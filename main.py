@@ -7,14 +7,12 @@ import re
 import time
 
 from colorama import init, Fore
-import dotenv
 import openai
 from telegram import constants, Update, Message
 from telegram.ext import filters, MessageHandler, ApplicationBuilder, ContextTypes, Defaults
 
 import config
 
-dotenv.load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 OPENAI_TOKEN = os.getenv("OPENAI_TOKEN")
 openai.api_key = OPENAI_TOKEN

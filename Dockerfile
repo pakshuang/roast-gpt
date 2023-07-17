@@ -8,6 +8,5 @@ RUN pip install -r requirements.txt
 
 ADD main.py .
 ADD config.py .
-ADD .env .
 
 CMD ["python", "-u", "./main.py"] 
