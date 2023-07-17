@@ -1,4 +1,3 @@
-import asyncio
 import datetime
 import json
 import os
@@ -32,7 +31,7 @@ def log_message(chat_history: list, message_sender: str, message_timestamp: str,
         json.dump(chat_history, file)
 
 
-def openai_request(system: str, prompt: str, temperature: float=1, max_tokens: int=100):
+def openai_request(system: str, prompt: str, temperature: float=1, max_tokens: int=200):
     for _ in range(config.MAX_RETRIES):
         try:
             completion = openai.ChatCompletion.create(
