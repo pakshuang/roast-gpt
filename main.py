@@ -34,6 +34,24 @@ def log_message(chat_history: list, message_sender: str, message_timestamp: str,
         json.dump(chat_history, file)
 
 
+def openai_request(system: str, prompt: str, temperature: float=1, max_tokens: int=100):
+    for _ in range(config.MAX_RETRIES):
+        try:
+            completion = openai.ChatCompletion.create(
+                model="gpt-3.5-turbo",
+                temperature = temperature,
+                max_tokens = max_tokens,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            return completion.choices[0].message.content
+        except openai.error.ServiceUnavailableError:
+            print(Fore.RED + f"SERVICE UNAVAILABLE, RETRYING IN {config.RETRY_DELAY} SECONDS...")
+            time.sleep(config.RETRY_DELAY)
+
+
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Get chat and message information
     message = update.message
@@ -54,16 +72,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Qualify message
     check_prompt = config.generate_check_prompt(message_text)
     print(Fore.BLUE + "Requesting sentiment analysis...")
-    sentiment_check = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        temperature = 0.2,
-        max_tokens = 1,
-        messages=[
-            {"role": "system", "content": config.SYSTEM_ROLE_CHECK},
-            {"role": "user", "content": check_prompt}
-        ]
-    )
-    sentiment_response = sentiment_check.choices[0].message.content
+    sentiment_response = openai_request(config.SYSTEM_ROLE_CHECK, check_prompt, temperature=0.2, max_tokens=1)
     print(Fore.BLUE + "SENTIMENT: " + sentiment_response)
     sentiment_cleaned = re.sub(r'\D', '', sentiment_response)
     sentiment_int = int(sentiment_cleaned) if sentiment_cleaned != "" else 0
@@ -75,24 +84,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # Generate roast reply
-    thread = "\n\n".join(chat_history)
+    thread = "\n\n".join(chat_history) + "\n\n" + f"NUS Wordle Bot, [{datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=8))).strftime(config.DATE_FORMAT)}]\n"
     main_prompt = config.generate_main_prompt(message_sender, thread)
     await context.bot.send_chat_action(chat_id=chat_id, action=constants.ChatAction.TYPING) # Show typing status
     print(Fore.BLUE + "Requesting response...")
-    for _ in range(config.MAX_RETRIES):
-        try:
-            completion = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": config.SYSTEM_ROLE_MAIN},
-                    {"role": "user", "content": main_prompt}
-                ]
-            )
-            main_response = completion.choices[0].message.content
-            break
-        except openai.error.ServiceUnavailableError:
-            print(Fore.RED + f"SERVICE UNAVAILABLE, RETRYING IN {config.RETRY_DELAY} SECONDS...")
-            time.sleep(config.RETRY_DELAY)
+    main_response = openai_request(config.SYSTEM_ROLE_MAIN, main_prompt)
+    if not main_response:
+        print(Fore.RED + "FAILED TO GET RESPONSE, SKIPPING...")
+        return
     main_response_cleaned = re.sub(r'^["\']', '', main_response)
     main_response_cleaned = re.sub(r'["\']$', '', main_response_cleaned)
     main_response_cleaned = re.sub(r'^You: ', '', main_response_cleaned)
