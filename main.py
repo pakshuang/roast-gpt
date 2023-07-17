@@ -97,8 +97,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     main_response_cleaned = re.sub(r'^NUS Wordle Bot: ', '', main_response_cleaned)
     print(Fore.LIGHTGREEN_EX + "RESPONSE: " + main_response)
     print(Fore.GREEN + "CLEANED RESPONSE: " + main_response_cleaned)
-    await context.bot.send_message(chat_id=update.effective_chat.id, reply_to_message_id=message_id, text=main_response)
     log_message(chat_history, "You", datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=8))).strftime(config.DATE_FORMAT), main_response, message)
+    await context.bot.send_message(chat_id=update.effective_chat.id, reply_to_message_id=message_id, text=main_response)
 
 
 if __name__ == '__main__':
@@ -116,4 +116,4 @@ if __name__ == '__main__':
     message_handler = MessageHandler(filters.Chat(chat_id=TARGET_CHAT_ID) & (filters.TEXT | filters.Sticker.ALL) & (~filters.COMMAND) & filters.UpdateType.MESSAGE, handle_message)
     application.add_handler(message_handler)
     print(Fore.GREEN + "Bot started, waiting for messages...")
-    asyncio.run(application.run_polling())
+    application.run_polling()
