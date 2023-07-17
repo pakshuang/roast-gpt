@@ -85,7 +85,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # Generate roast reply
-    thread = "\n\n".join(chat_history) + "\n\n" + f"NUS Wordle Bot, [{datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=8))).strftime(config.DATE_FORMAT)}]\n"
+    thread = "\n\n".join(chat_history)
     main_prompt = config.generate_main_prompt(message_sender, thread, message_reply_sender)
     await context.bot.send_chat_action(chat_id=chat_id, action=constants.ChatAction.TYPING) # Show typing status
     print(Fore.BLUE + "Requesting response...")
