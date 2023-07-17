@@ -62,6 +62,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_timestamp = message.date.strftime(config.DATE_FORMAT)
     message_text = message.text if not message.sticker else message.sticker.emoji
     message_reply = message.reply_to_message
+    message_reply_sender = message_reply['from'].first_name if message_reply else None
     log_message(chat_history, message_sender, message_timestamp, message_text, message_reply)
 
     # Only run prompts for messages from certain users
@@ -85,7 +86,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Generate roast reply
     thread = "\n\n".join(chat_history) + "\n\n" + f"NUS Wordle Bot, [{datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=8))).strftime(config.DATE_FORMAT)}]\n"
-    main_prompt = config.generate_main_prompt(message_sender, thread)
+    main_prompt = config.generate_main_prompt(message_sender, thread, message_reply_sender)
     await context.bot.send_chat_action(chat_id=chat_id, action=constants.ChatAction.TYPING) # Show typing status
     print(Fore.BLUE + "Requesting response...")
     main_response = openai_request(config.SYSTEM_ROLE_MAIN, main_prompt)
