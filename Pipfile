@@ -7,7 +7,6 @@ name = "pypi"
 python-telegram-bot = "*"
 requests = "*"
 openai = "*"
-python-dotenv = "*"
 colorama = "*"
 
 [dev-packages]
