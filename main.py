@@ -63,7 +63,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     log_message(chat_history, message_sender, message_timestamp, message_text, message_reply)
 
     # Only run prompts for messages of specfic criteria
-    if message_sender_username in TARGET_USERNAMES or (config.FUZZY_USER_FILTER and random.randint(1,100) <= config.FUZZY_PROBABILITY): # Whitelist and fuzzy user filters
+    if message_reply_sender is "NUS Wordle Bot": # Direct reply filter
+        pass
+    elif "wordle bot" in message_text.lower(): # Keyphrase filter
+        pass
+    elif message_sender_username in TARGET_USERNAMES or (config.FUZZY_USER_FILTER and random.randint(1,100) <= config.FUZZY_PROBABILITY): # Whitelist and fuzzy user filters
         # Qualify message
         check_prompt = config.generate_check_prompt(message_text)
         print(Fore.BLUE + "Requesting sentiment analysis...")
@@ -77,9 +81,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             print(Fore.RED + "NOT QUALIFIED, SKIPPING...")
             return
-    elif message_reply_sender is not "NUS Wordle Bot": # Direct reply filter
-            if "wordle bot" not in message_text.lower(): # Keyphrase filter
-                return
+    else:
+        return
 
     # Generate roast reply
     prompt_timestamp = f"NUS Wordle Bot, [{datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=8))).strftime(config.DATE_FORMAT)}]"
