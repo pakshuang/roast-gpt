@@ -27,7 +27,7 @@ def log_message(chat_history: list, message_sender: str, message_timestamp: str,
     print(message)
     while len(chat_history) > config.CHAT_HISTORY_LENGTH:
         chat_history.pop(0)
-    with open("chat_history.json", "w") as file:
+    with open("/data/chat_history.json", "w") as file:
         json.dump(chat_history, file)
 
 
@@ -103,11 +103,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 if __name__ == '__main__':
-    if not os.path.exists("chat_history.json"):
+    if not os.path.exists("/data/chat_history.json"):
         print(Fore.RED + "Chat history not found, creating new file...")
-        with open("chat_history.json", "w") as file:
+        with open("/data/chat_history.json", "w") as file:
             json.dump([], file)
-    with open("chat_history.json", "rb") as file:
+    with open("/data/chat_history.json", "rb") as file:
         chat_history = json.load(file)
         print(Fore.BLUE + "Chat history:")
         for message in chat_history:
