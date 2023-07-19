@@ -62,10 +62,12 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_reply_sender = message_reply['from'].first_name if message_reply else None
     log_message(chat_history, message_sender, message_timestamp, message_text, message_reply)
 
-    # Only run prompts for messages from certain users
+    # Only run prompts for messages of specfic criteria
     if message_sender_username not in TARGET_USERNAMES: # User filter
-        if not (config.FUZZY_USER_FILTER and random.randint(1,100) <= config.FUZZY_PROBABILITY): # Fuzzy user filter
-            return
+        if message_reply_sender is not "NUS Wordle Bot": # Direct reply filter
+            if "wordle bot" not in message_text.lower(): # Keyphrase filter
+                if not (config.FUZZY_USER_FILTER and random.randint(1,100) <= config.FUZZY_PROBABILITY): # Fuzzy user filter
+                    return
 
     # Qualify message
     check_prompt = config.generate_check_prompt(message_text)
