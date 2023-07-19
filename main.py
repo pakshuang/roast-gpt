@@ -85,7 +85,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # Generate roast reply
-    prompt_timestamp = f"NUS Wordle Bot, [{datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=8))).strftime(config.DATE_FORMAT)}]"
+    prompt_timestamp = f"You, [{datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=8))).strftime(config.DATE_FORMAT)}]"
     reply_timestamp = f"[Replying to {message_sender}'s message sent at {message_timestamp}]"
     thread = "\n\n".join(chat_history) + "\n\n" + prompt_timestamp + reply_timestamp + "\n"
     main_prompt = config.generate_main_prompt(message_sender, thread, message_reply_sender)
