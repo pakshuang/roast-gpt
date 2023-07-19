@@ -63,7 +63,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     log_message(chat_history, message_sender, message_timestamp, message_text, message_reply)
 
     # Only run prompts for messages of specfic criteria
-    if message_reply_sender is "NUS Wordle Bot": # Direct reply filter
+    if message_reply_sender == "NUS Wordle Bot": # Direct reply filter
         pass
     elif "wordle bot" in message_text.lower(): # Keyphrase filter
         pass
