@@ -63,25 +63,23 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     log_message(chat_history, message_sender, message_timestamp, message_text, message_reply)
 
     # Only run prompts for messages of specfic criteria
-    if message_sender_username not in TARGET_USERNAMES: # User filter
-        if message_reply_sender is not "NUS Wordle Bot": # Direct reply filter
+    if message_sender_username in TARGET_USERNAMES or (config.FUZZY_USER_FILTER and random.randint(1,100) <= config.FUZZY_PROBABILITY): # Whitelist and fuzzy user filters
+        # Qualify message
+        check_prompt = config.generate_check_prompt(message_text)
+        print(Fore.BLUE + "Requesting sentiment analysis...")
+        sentiment_response = openai_request(config.SYSTEM_ROLE_CHECK, check_prompt, temperature=0.2, max_tokens=1)
+        print(Fore.BLUE + "SENTIMENT: " + sentiment_response)
+        sentiment_cleaned = re.sub(r'\D', '', sentiment_response)
+        sentiment_int = int(sentiment_cleaned) if sentiment_cleaned != "" else 0
+        print(Fore.BLUE + "SENTIMENT CLEANED: " + str(sentiment_int))
+        if config.QUALIFICATION_THRESHOLD <= sentiment_int <= 10:
+            print(Fore.GREEN + "QUALIFIED")
+        else:
+            print(Fore.RED + "NOT QUALIFIED, SKIPPING...")
+            return
+    elif message_reply_sender is not "NUS Wordle Bot": # Direct reply filter
             if "wordle bot" not in message_text.lower(): # Keyphrase filter
-                if not (config.FUZZY_USER_FILTER and random.randint(1,100) <= config.FUZZY_PROBABILITY): # Fuzzy user filter
-                    return
-
-    # Qualify message
-    check_prompt = config.generate_check_prompt(message_text)
-    print(Fore.BLUE + "Requesting sentiment analysis...")
-    sentiment_response = openai_request(config.SYSTEM_ROLE_CHECK, check_prompt, temperature=0.2, max_tokens=1)
-    print(Fore.BLUE + "SENTIMENT: " + sentiment_response)
-    sentiment_cleaned = re.sub(r'\D', '', sentiment_response)
-    sentiment_int = int(sentiment_cleaned) if sentiment_cleaned != "" else 0
-    print(Fore.BLUE + "SENTIMENT CLEANED: " + str(sentiment_int))
-    if config.QUALIFICATION_THRESHOLD <= sentiment_int <= 10:
-        print(Fore.GREEN + "QUALIFIED")
-    else:
-        print(Fore.RED + "NOT QUALIFIED, SKIPPING...")
-        return
+                return
 
     # Generate roast reply
     prompt_timestamp = f"NUS Wordle Bot, [{datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=8))).strftime(config.DATE_FORMAT)}]"
