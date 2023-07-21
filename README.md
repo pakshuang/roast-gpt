@@ -8,8 +8,8 @@ This was built as a fun project for a group chat with friends.
 
 ![image](https://github.com/pakshuang/roast-gpt/assets/81917538/fa865bcc-37a7-4f40-8e42-fb72f71516b6)
 
-## Deployment Architecture
-![AWS Architecture](assets/aws.svg)
+## CI/CD Deployment Pipeline
+![AWS Pipeline](assets/aws.svg)
 
 ## Building
 
