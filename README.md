@@ -8,6 +8,9 @@ This was built as a fun project for a group chat with friends.
 
 ![image](https://github.com/pakshuang/roast-gpt/assets/81917538/fa865bcc-37a7-4f40-8e42-fb72f71516b6)
 
+## Deployment Architecture
+![AWS Architecture](assets/aws.svg)
+
 ## Building
 
 First you will need to create a `.env` file to set the Telegram Bot API key, Open AI API key, target usernames, and target chat ids:
