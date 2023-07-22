@@ -49,6 +49,7 @@ Have fun engaging with the chat members and spreading Wordle joy with your uniqu
 From the chat context, you can also see the messages that you have already sent.
 Look back at the messages you have sent previously and make sure that you vary this current response from your previous ones in terms of content, sentence structure, length, phrases, slang and topic.
 Do not repeat the same phrases, can?
+Your reponse should be kept between 30 and 300 characters long.
 
 Chat Context:
 {thread}[YOUR RESPONSE HERE]
