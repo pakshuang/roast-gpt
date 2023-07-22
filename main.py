@@ -17,6 +17,7 @@ OPENAI_TOKEN = os.getenv("OPENAI_TOKEN")
 openai.api_key = OPENAI_TOKEN
 TARGET_USERNAMES = json.loads(os.getenv("TARGET_USERNAMES"))
 TARGET_CHAT_ID = json.loads(os.getenv("TARGET_CHAT_ID"))
+CLEAR_CHAT_HISTORY = eval(os.getenv("CLEAR_CHAT_HISTORY", "False"))
 init(autoreset=True) # Colorama
 
 
@@ -106,7 +107,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 if __name__ == '__main__':
-    if not os.path.exists("/data/chat_history.json"):
+    if not os.path.exists("/data/chat_history.json") or CLEAR_CHAT_HISTORY:
         print(Fore.RED + "Chat history not found, creating new file...")
         with open("/data/chat_history.json", "w") as file:
             json.dump([], file)
