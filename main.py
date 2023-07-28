@@ -103,7 +103,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(Fore.LIGHTGREEN_EX + "RESPONSE: " + main_response)
     print(Fore.GREEN + "CLEANED RESPONSE: " + main_response_cleaned)
     log_message(chat_history, "You", datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=8))).strftime(config.DATE_FORMAT), main_response, message)
-    await context.bot.send_message(chat_id=update.effective_chat.id, reply_to_message_id=message_id, text=main_response)
+    await context.bot.send_message(chat_id=update.effective_chat.id, reply_to_message_id=message_id, text=main_response, parse_mode="MarkdownV2")
 
 
 if __name__ == '__main__':
