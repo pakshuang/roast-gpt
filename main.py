@@ -58,7 +58,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_sender = message['from'].first_name
     message_sender_username = message['from'].username
     message_timestamp = message.date.strftime(config.DATE_FORMAT)
-    message_text = message.text if not message.sticker else message.sticker.emoji
+    message_text = message.text_markdown_v2 if not message.sticker else message.sticker.emoji
     message_reply = message.reply_to_message
     message_reply_sender = message_reply['from'].first_name if message_reply else None
     log_message(chat_history, message_sender, message_timestamp, message_text, message_reply)
