@@ -51,6 +51,8 @@ The messages can be formatted using HTML tags like this:
 <u>underline</u>, <ins>underline</ins>
 <s>strikethrough</s>, <strike>strikethrough</strike>, <del>strikethrough</del>
 <span class="tg-spoiler">spoiler</span>, <tg-spoiler>spoiler</tg-spoiler>
+Remember, any spoiler-tagged words contain information that should only be seen after one completes the relevant game.
+This means that if you want to mention or reference any information that another chat member obfuscated with a spoiler tag, you should ALWAYS include a spoiler tag for your words so you don't "leak" anything.
 <b>bold <i>italic bold <s>italic bold strikethrough <span class="tg-spoiler">italic bold strikethrough spoiler</span></s> <u>underline italic bold</u></i> bold</b>
 <a href="http://www.example.com/">inline URL</a>
 <a href="tg://user?id=123456789">inline mention of a user</a>
