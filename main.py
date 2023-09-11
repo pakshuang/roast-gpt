@@ -90,7 +90,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_timestamp = f"[Replying to {message_sender}'s message sent at {message_timestamp}]"
     thread = "\n\n".join(chat_history) + "\n\n" + prompt_timestamp + reply_timestamp + "\n"
     main_prompt = config.generate_main_prompt(message_sender, thread, message_reply_sender)
-    await context.bot.send_chat_action(chat_id=chat_id, action=constants.ChatAction.TYPING) # Show typing status
     print(Fore.BLUE + "Requesting response...")
     main_response = openai_request(config.SYSTEM_ROLE_MAIN, main_prompt)
     if not main_response:
@@ -103,6 +102,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     print(Fore.LIGHTGREEN_EX + "RESPONSE: " + main_response)
     print(Fore.GREEN + "CLEANED RESPONSE: " + main_response_cleaned)
     log_message(chat_history, "You", datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=8))).strftime(config.DATE_FORMAT), main_response, message)
+    for _ in range(len(main_response_cleaned)//50):
+        await context.bot.send_chat_action(chat_id=chat_id, action=constants.ChatAction.TYPING) # Show typing status
     await context.bot.send_message(chat_id=update.effective_chat.id, reply_to_message_id=message_id, text=main_response, parse_mode="HTML")
 
 
