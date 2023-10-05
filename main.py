@@ -59,6 +59,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     message_sender_username = message['from'].username
     message_timestamp = message.date.strftime(config.DATE_FORMAT)
     message_text = message.text_html if not message.sticker else message.sticker.emoji
+    # Redact text within spoiler tags
+    message_text = re.sub(r'(<span class="tg-spoiler">|<tg-spoiler>)(.*?)(</span>|</tg-spoiler>)', r'[SPOILER REDACTED]', message_text)
     message_reply = message.reply_to_message
     message_reply_sender = message_reply['from'].first_name if message_reply else None
     log_message(chat_history, message_sender, message_timestamp, message_text, message_reply)
