@@ -1,7 +1,8 @@
 FROM public.ecr.aws/docker/library/python:3.10-alpine
 
-ADD Pipfile.lock .
+RUN apk add py3-pip
 RUN pip install pipenv
+ADD Pipfile.lock .
 RUN pipenv requirements > requirements.txt
 RUN pip uninstall pipenv -y
 RUN pip install -r requirements.txt
