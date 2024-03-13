@@ -15,7 +15,8 @@ import config
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
 OPENAI_TOKEN = os.getenv("OPENAI_TOKEN")
 openai.api_key = OPENAI_TOKEN
-TARGET_USERNAMES = json.loads(os.getenv("TARGET_USERNAMES"))
+WHITELIST_USERNAMES = json.loads(os.getenv("WHITELIST_USERNAMES", "[]"))
+BLACKLIST_USERNAMES = json.loads(os.getenv("BLACKLIST_USERNAMES", "[]"))
 TARGET_CHAT_ID = json.loads(os.getenv("TARGET_CHAT_ID"))
 CLEAR_CHAT_HISTORY = eval(os.getenv("CLEAR_CHAT_HISTORY", "False"))
 init(autoreset=True) # Colorama
@@ -66,11 +67,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     log_message(chat_history, message_sender, message_timestamp, message_text, message_reply)
 
     # Only run prompts for messages of specfic criteria
-    if message_reply_sender == "NUS Wordle Bot": # Direct reply filter
+    if message_sender_username in BLACKLIST_USERNAMES: # Blacklist filter
+        return
+    elif message_reply_sender == "NUS Wordle Bot": # Direct reply filter
         pass
     elif "wordle bot" in message_text.lower(): # Keyphrase filter
         pass
-    elif message_sender_username in TARGET_USERNAMES or (config.FUZZY_USER_FILTER and random.randint(1,100) <= config.FUZZY_PROBABILITY): # Whitelist and fuzzy user filters
+    elif message_sender_username in WHITELIST_USERNAMES or (config.FUZZY_USER_FILTER and random.randint(1,100) <= config.FUZZY_PROBABILITY): # Whitelist and fuzzy user filters
         # Qualify message
         check_prompt = config.generate_check_prompt(message_text)
         print(Fore.BLUE + "Requesting sentiment analysis...")
