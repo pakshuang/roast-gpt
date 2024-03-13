@@ -5,7 +5,6 @@ import random
 import re
 import time
 
-from colorama import init, Fore
 import openai
 from telegram import constants, Update, Message
 from telegram.ext import filters, MessageHandler, ApplicationBuilder, ContextTypes, Defaults
@@ -19,7 +18,6 @@ WHITELIST_USERNAMES = json.loads(os.getenv("WHITELIST_USERNAMES", "[]"))
 BLACKLIST_USERNAMES = json.loads(os.getenv("BLACKLIST_USERNAMES", "[]"))
 TARGET_CHAT_ID = json.loads(os.getenv("TARGET_CHAT_ID"))
 CLEAR_CHAT_HISTORY = eval(os.getenv("CLEAR_CHAT_HISTORY", "False"))
-init(autoreset=True) # Colorama
 
 
 def log_message(chat_history: list, message_sender: str, message_timestamp: str, message_text: str, reply: Message=None):
@@ -47,7 +45,7 @@ def openai_request(system: str, prompt: str, temperature: float=1, max_tokens: i
             )
             return completion.choices[0].message.content
         except openai.error.ServiceUnavailableError:
-            print(Fore.RED + f"SERVICE UNAVAILABLE, RETRYING IN {config.RETRY_DELAY} SECONDS...")
+            print(f"OPENAI SERVICE UNAVAILABLE, RETRYING IN {config.RETRY_DELAY} SECONDS...")
             time.sleep(config.RETRY_DELAY)
 
 
@@ -76,16 +74,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif message_sender_username in WHITELIST_USERNAMES or (config.FUZZY_USER_FILTER and random.randint(1,100) <= config.FUZZY_PROBABILITY): # Whitelist and fuzzy user filters
         # Qualify message
         check_prompt = config.generate_check_prompt(message_text)
-        print(Fore.BLUE + "Requesting sentiment analysis...")
+        print("RUNNING SENTIMENT ANALYSIS...")
         sentiment_response = openai_request(config.SYSTEM_ROLE_CHECK, check_prompt, temperature=0.2, max_tokens=1)
-        print(Fore.BLUE + "SENTIMENT: " + sentiment_response)
+        print("SENTIMENT: " + sentiment_response)
         sentiment_cleaned = re.sub(r'\D', '', sentiment_response)
         sentiment_int = int(sentiment_cleaned) if sentiment_cleaned != "" else 0
-        print(Fore.BLUE + "SENTIMENT CLEANED: " + str(sentiment_int))
+        print("SENTIMENT CLEANED: " + str(sentiment_int))
         if config.QUALIFICATION_THRESHOLD <= sentiment_int <= 10:
-            print(Fore.GREEN + "QUALIFIED")
+            print("QUALIFIED")
         else:
-            print(Fore.RED + "NOT QUALIFIED, SKIPPING...")
+            print("NOT QUALIFIED, SKIPPING...")
             return
     else:
         return
@@ -95,17 +93,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_timestamp = f"[Replying to {message_sender}'s message sent at {message_timestamp}]"
     thread = "\n\n".join(chat_history) + "\n\n" + prompt_timestamp + reply_timestamp + "\n"
     main_prompt = config.generate_main_prompt(message_sender, thread, message_reply_sender)
-    print(Fore.BLUE + "Requesting response...")
+    print("Requesting response...")
     main_response = openai_request(config.SYSTEM_ROLE_MAIN, main_prompt)
     if not main_response:
-        print(Fore.RED + "FAILED TO GET RESPONSE, SKIPPING...")
+        print("FAILED TO GET RESPONSE, SKIPPING...")
         return
     main_response_cleaned = re.sub(r'^["\']', '', main_response)
     main_response_cleaned = re.sub(r'["\']$', '', main_response_cleaned)
     main_response_cleaned = re.sub(r'^You: ', '', main_response_cleaned)
     main_response_cleaned = re.sub(r'^NUS Wordle Bot: ', '', main_response_cleaned)
-    print(Fore.LIGHTGREEN_EX + "RESPONSE: " + main_response)
-    print(Fore.GREEN + "CLEANED RESPONSE: " + main_response_cleaned)
+    print("RESPONSE: " + main_response)
+    print("CLEANED RESPONSE: " + main_response_cleaned)
     log_message(chat_history, "You", datetime.datetime.now(tz=datetime.timezone(datetime.timedelta(hours=8))).strftime(config.DATE_FORMAT), main_response, message)
     for _ in range(len(main_response_cleaned)//50):
         await context.bot.send_chat_action(chat_id=chat_id, action=constants.ChatAction.TYPING) # Show typing status
@@ -114,17 +112,17 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 if __name__ == '__main__':
     if not os.path.exists("/data/chat_history.json") or CLEAR_CHAT_HISTORY:
-        print(Fore.RED + "Chat history not found, creating new file...")
+        print("CREATING NEW CHAT HISTORY FILE...")
         with open("/data/chat_history.json", "w") as file:
             json.dump([], file)
     with open("/data/chat_history.json", "rb") as file:
         chat_history = json.load(file)
-        print(Fore.BLUE + "Chat history:")
-        for message in chat_history:
-            print(message)
+        print("CHAT HISTORY LENGTH: " + str(len(chat_history)))
     defaults = Defaults(tzinfo=datetime.timezone(datetime.timedelta(hours=8)))
     application = ApplicationBuilder().token(TELEGRAM_TOKEN).defaults(defaults).build()
     message_handler = MessageHandler(filters.Chat(chat_id=TARGET_CHAT_ID) & (filters.TEXT | filters.Sticker.ALL) & (~filters.COMMAND) & filters.UpdateType.MESSAGE, handle_message)
     application.add_handler(message_handler)
-    print(Fore.GREEN + "Bot started, waiting for messages...")
+    print("WHITELISTED USERNAMES: " + str(WHITELIST_USERNAMES))
+    print("BLACKLISTED USERNAMES: " + str(BLACKLIST_USERNAMES))
+    print("BOT STARTED, WAITING FOR NEW MESSAGES...")
     application.run_polling()
