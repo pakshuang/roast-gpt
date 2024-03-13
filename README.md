@@ -19,7 +19,8 @@ First you will need to create a `.env` file to set the Telegram Bot API key, Ope
 ```Dotenv
 TELEGRAM_TOKEN = "INSERT TELEGRAM TOKEN HERE"
 OPENAI_TOKEN = "INSERT OPEN AI API TOKEN HERE"
-TARGET_USERNAMES = ["username1", "username2"]
+WHITELIST_USERNAMES = ["username1", "username2"]
+BLACKLIST_USERNAMES = ["username3", "username4"]
 TARGET_CHAT_ID = [-100987654321]
 ```
 
