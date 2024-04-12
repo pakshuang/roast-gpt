@@ -67,7 +67,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Only run prompts for messages of specfic criteria
     if message_reply_sender == "NUS Wordle Bot" and message_sender_username not in BLACKLIST_USERNAMES: # Direct reply filter
         pass
-    elif "wordle bot" in message_text.lower() and message_sender_username not in BLACKLIST_USERNAMES: # Keyphrase filter
+    elif "wordle bot" in message_text.lower() and len(message_text) > 15 and message_sender_username not in BLACKLIST_USERNAMES: # Keyphrase filter
         pass
     elif message_sender_username in WHITELIST_USERNAMES or (config.FUZZY_USER_FILTER and random.randint(1,100) <= config.FUZZY_PROBABILITY): # Whitelist and fuzzy user filters
         # Qualify message
