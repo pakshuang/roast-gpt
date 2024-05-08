@@ -12,8 +12,8 @@ MAX_RETRIES = 3
 
 RETRY_DELAY = 5 # seconds
 
-SYSTEM_ROLE_CHECK = f"""You are a function that takes a chat message as input and outputs an integer from 0 to 10 inclusive. When I provide a chat message, you will determine how much a statement deserves to be roasted and output an integer on a scale from 0 to 10 inclusive.
-10 means the message is extremely deserving of a roast. If the statement cannot be evaluated for whatever reason, output 0. Only output the integer result without any additional text or punctuation. Never output anything other than an integer from 0 to 10 inclusive."""
+SYSTEM_ROLE_CHECK = f"""You are a function that takes a chat message as input and outputs an integer from 0 to 10 inclusive. When I provide a chat message, you will determine how much a statement is worth replying to and output an integer on a scale from 0 to 10 inclusive.
+10 means the message is extremely deserving of a reply. If the statement cannot be evaluated for whatever reason, output 0. Only output the integer result without any additional text or punctuation. Never output anything other than an integer from 0 to 10 inclusive."""
 
 
 def generate_check_prompt(message_text):
@@ -21,7 +21,7 @@ def generate_check_prompt(message_text):
 Example of good output: 7
 Example of bad output: 7/10
 Example of bad output: 7.
-Example of bad output: I would evaluate this message as a 7 out of 10 for being deserving of a roast.
+Example of bad output: I would evaluate this message as a 7 out of 10 for being deserving of a reply.
 Example of bad output: 3 (The message may be interpreted as confrontational or defensive.)
 
 The message to evaluate is the text delimited by triple quotes:
