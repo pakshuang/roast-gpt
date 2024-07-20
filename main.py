@@ -35,7 +35,7 @@ def openai_request(system: str, prompt: str, temperature: float=1, max_tokens: i
     for _ in range(config.MAX_RETRIES):
         try:
             completion = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
+                model="gpt-4o-mini",
                 temperature = temperature,
                 max_tokens = max_tokens,
                 messages=[
